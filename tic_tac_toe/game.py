@@ -1,17 +1,16 @@
+# game.py
 from gameparts import Board
 
 
 def main():
-    # Создать игровое поле - объект класса Board.
     game = Board()
-    # Отрисовать поле в терминале.
     game.display()
-    # Разместить на поле символ по указанным координатам - сделать ход.
-    game.make_move(1, 2, 'X')
-    game.make_move(0, 0, 'X')
-    game.make_move(2, 2, 'X')
+    # Тут пользователь вводит координаты ячейки.
+    row = int(input('Введите номер строки: '))
+    column = int(input('Введите номер столбца: '))
+    # В метод make_move передаются те координаты, которые ввёл пользователь.
+    game.make_move(row, column, 'X')
     print('Ход сделан!')
-    # Перерисовать поле с учётом сделанного хода.
     game.display()
 
 
