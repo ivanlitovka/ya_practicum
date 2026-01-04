@@ -17,6 +17,9 @@ def main():
         # ...выбросить исключение FieldIndexError.
         raise FieldIndexError
     column = int(input('Введите номер столбца: '))
+    if column < 0 or column >= game.field_size:
+        # ...выбросить исключение FieldIndexError.
+        raise FieldIndexError   
     game.make_move(row, column, 'X')
     print('Ход сделан!')
     game.display()
