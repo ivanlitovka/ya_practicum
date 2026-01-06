@@ -1,7 +1,6 @@
 # game.py
 
 from gameparts import Board
-# Добавился ещё один импорт - исключение CellOccupiedError.
 from gameparts.exceptions import CellOccupiedError, FieldIndexError
 
 
@@ -15,7 +14,6 @@ def main():
 
         print(f'Ход делают {current_player}')
 
-        # Запускается бесконечный цикл.
         while True:
             try:
                 row = int(input('Введите номер строки: '))
@@ -25,7 +23,6 @@ def main():
                 if column < 0 or column >= game.field_size:
                     raise FieldIndexError
                 if game.board[row][column] != ' ':
-                    # Вот тут выбрасывается новое исключение.
                     raise CellOccupiedError
             except FieldIndexError:
                 print(
@@ -35,8 +32,8 @@ def main():
                 print('Введите значения для строки и столбца заново.')
                 continue
             except CellOccupiedError:
-                print('Ячейка занята')
-                print('Введите другие координаты.')
+                print('Ячейка занята.')
+                print('Пожалуйста, введите другие координаты.')
                 continue
             except ValueError:
                 print('Буквы вводить нельзя. Только числа.')
@@ -49,7 +46,24 @@ def main():
 
         game.make_move(row, column, current_player)
         game.display()
+        # После каждого хода надо делать проверку на победу и на ничью.
+        if game.check_win(current_player):
+            win_string = f'Победили {current_player}!\n'
+            print(win_string)
+            save_result(win_string)
+            running = False
+        elif game.is_board_full():
+            print('Ничья!')
+            save_result('Ничья\n')
+            running = False
+
         current_player = 'O' if current_player == 'X' else 'X'
+
+
+def save_result(string):
+    file = open('result.txt', 'a', encoding='utf-8')
+    file.write(string)
+    file.close()
 
 
 if __name__ == '__main__':
