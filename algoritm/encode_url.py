@@ -17,13 +17,14 @@ class MarsURLEncoder:
     def decode(self, short_url):
         """Декодирует короткую ссылку вида https://ma.rs/X7NYIol в исходную."""
         path = urlparse(short_url).path.lstrip('/')
-        long_url = self.url_db.pop(path)
+        long_url = self.url_db[path]
         return long_url
 
 
 if __name__ == '__main__':
     url_database = MarsURLEncoder()
-    url_database.encode('https://mars.attack/base/destroy')
-    url_database.encode('https://mars.attack/humman_must_be_catch')
-    url_database.decode('https://ma.rs/47c4bc0b')
-    url_database.decode('https://ma.rs/0c1847b8')
+    print(url_database.encode('https://mars.attack/base/destroy'))
+    print(url_database.encode('https://mars.attack/humman_must_be_catch'))
+    print(url_database.decode('https://ma.rs/47c4bc0b'))
+    print(url_database.decode('https://ma.rs/0c1847b8'))
+    print(url_database.url_db)
