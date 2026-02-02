@@ -1,3 +1,6 @@
+# № посылки 1
+# https://docs.google.com/document/d/12gc-1Z2IbRB0LvSBVhzls4e4xSSnp4cZY165UwU9z_k/edit?usp=sharing
+
 def calculate_platforms(robot_weights: list[int], limit: int) -> int:
     robot_weights.sort()
 
