@@ -38,3 +38,11 @@ CREATE TABLE car_shop.colors (
 	color_name varchar(50) NOT NULL
 	);
 
+ALTER TABLE car_shop.car_models rename COLUMN id to model_id;
+
+--Таблица автомобилий
+CREATE TABLE car_shop.cars (
+	car_id serial PRIMARY KEY,
+	model_id integer REFERENCES car_shop.car_models(model_id),
+	color_is
+)
