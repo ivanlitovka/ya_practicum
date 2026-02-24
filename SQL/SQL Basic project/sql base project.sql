@@ -1,3 +1,4 @@
+
 CREATE SCHEMA IF NOT EXISTS raw_data;
 
 CREATE TABLE IF NOT EXISTS raw_data.sales (
@@ -29,7 +30,7 @@ CREATE TABLE  car_shop.brands (
 CREATE TABLE car_shop.car_models (
 	model_id serial PRIMARY KEY,
 	brand_id int REFERENCES car_shop.brands(brand_id),
-	model_name text NOT NULL,
+	model_name text NOT NULL
 	);
 
 -- Таблица цветов
@@ -38,11 +39,30 @@ CREATE TABLE car_shop.colors (
 	color_name varchar(50) NOT NULL
 	);
 
-ALTER TABLE car_shop.car_models rename COLUMN id to model_id;
+ALTER TABLE car_shop.colors rename COLUMN colors_id to color_id;
 
 --Таблица автомобилий
 CREATE TABLE car_shop.cars (
 	car_id serial PRIMARY KEY,
 	model_id integer REFERENCES car_shop.car_models(model_id),
-	color_is
-)
+	color_id integer REFERENCES car_shop.colors(color_id),
+	price numeric(9,2) CHECK (price > 0), --  Тут вопрос, по сути должна стоять чистая. Надо ли ее расчитывать
+	gasoline_consumption numeric(4,2) CHECK (gasoline_consumption > 0)	
+);
+
+--Таблица клиентов
+CREATE TABLE car_shop.customers (
+	customer_id serial PRIMARY KEY,
+	full_name text UNIQUE NOT NULL,
+	phone varchar(25) UNIQUE NOT NULL
+);
+
+--Таблица продаж
+CREATE TABLE car_shop.sales (
+	sale_id serial PRIMARY KEY,
+	car_id integer REFERENCES car_shop.cars(car_id),
+	customer_id integer REFERENCES car_shop.customers(customer_id),
+	sale_date date NOT NULL,
+	discount numeric(5,2) CHECK (discount BETWEEN 0 AND 100),
+	final_price NUMERIC(9,2) CHECK (final_price > 0)
+);
