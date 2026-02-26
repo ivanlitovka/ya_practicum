@@ -172,7 +172,8 @@ SELECT
 	b.brand_name AS brand,
 	extract(YEAR FROM s.sale_date) AS year,
 	avg(s.final_price)::numeric(9,2) AS price_avg
-FROM car_shop.sales s
+FROM
+	car_shop.sales s
 JOIN car_shop.cars c USING (car_id)
 JOIN car_shop.car_models cm USING (model_id)
 JOIN car_shop.brands b USING (brand_id)
@@ -186,11 +187,60 @@ ORDER BY 1
  Среднюю цену округлите до второго знака после запятой. */
 
 SELECT 
-	MONTH, extract(YEAR FROM s.sale_date) AS year, avg(s.final_price)::numeric(9,2)
+	month,
+	extract(YEAR FROM s.sale_date) AS year,
+	avg(s.final_price)::numeric(9,2)
 FROM 
 	generate_series(1, 12, 1) AS month
 JOIN car_shop.sales s ON EXTRACT(MONTH FROM s.sale_date) = month
 WHERE EXTRACT(YEAR FROM s.sale_date) = 2022
-GROUP BY month;
+GROUP BY MONTH, extract(YEAR FROM s.sale_date)
+ORDER BY 1;
+
+--Задание 4
+/* Используя функцию STRING_AGG, напишите запрос,
+ * который выведет список купленных машин у каждого пользователя через запятую.
+ * Пользователь может купить две одинаковые машины — это нормально.
+ * Название машины покажите полное, с названием бренда — например: Tesla Model 3.
+ * Отсортируйте по имени пользователя в восходящем порядке.
+ * Сортировка внутри самой строки с машинами не нужна. */
+
+SELECT
+	cus.full_name,
+	string_agg(CONCAT_WS(' ', b.brand_name, cm.model_name), ', ')
+FROM
+	car_shop.sales s
+JOIN car_shop.cars c USING (car_id)
+JOIN car_shop.car_models cm USING (model_id)
+JOIN car_shop.brands b USING (brand_id)
+JOIN car_shop.customers cus USING (customer_id)
+GROUP BY cus.full_name 
+ORDER BY 1;
+
+--Задание 5
+/* Напишите запрос, который вернёт самую большую и самую маленькую цену продажи автомобиля
+ * с разбивкой по стране без учёта скидки. Цена в колонке price дана с учётом скидки. */
+
+SELECT
+	b.origin_country,
+	min(s.final_price - s.final_price / 100 * s.discount)::NUMERIC(9,2) AS price_min,
+	max(s.final_price - s.final_price / 100 * s.discount)::NUMERIC(9,2)	AS price_max
+FROM
+	car_shop.sales s
+JOIN car_shop.cars c USING (car_id)
+JOIN car_shop.car_models cm USING (model_id)
+JOIN car_shop.brands b USING (brand_id)
+GROUP BY b.origin_country
+ORDER BY 1;
+
+--Задание 6
+/* Напишите запрос, который покажет количество всех пользователей из США. Это пользователи, у которых номер телефона начинается на +1. */
 
 
+SELECT
+	count(*) AS persons_from_usa_count
+FROM
+	car_shop.sales s
+JOIN car_shop.customers cus USING (customer_id)
+WHERE cus.phone LIKE '%+1%'
+;
