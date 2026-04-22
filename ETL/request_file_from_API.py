@@ -34,4 +34,5 @@ for link in links_list:
     print(link)
     print(link.split('/')[-1])
     df_order_log = pd.read_csv(link)
-    df_order_log.to_csv(f'./stage/{link.split("/")[-1]}')
+    print(df_order_log.to_string(index=False))
+    df_order_log.to_csv(f'./stage/{link.split("/")[-1]}', index=False)
