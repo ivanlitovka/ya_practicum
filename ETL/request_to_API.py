@@ -46,3 +46,9 @@ method_url = f'/get_report?task_id={task_id}'
 r = requests.get(url + method_url, headers=headers)
 response_dict = json.loads(r.content)
 print(response_dict)
+s3_paths = response_dict['data']['s3_path']
+
+# Превращаем в список значений (самих URL)
+links_list = list(s3_paths.values())
+
+print(links_list)

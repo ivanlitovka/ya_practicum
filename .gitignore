@@ -208,3 +208,4 @@ __marimo__/
 input.txt
 output.txt
 .DS_Store
+**/stage
