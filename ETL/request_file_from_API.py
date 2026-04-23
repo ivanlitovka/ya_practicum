@@ -25,7 +25,7 @@ r = requests.get(url + method_url, headers=headers)
 response_dict = json.loads(r.content)
 # print(response_dict)
 s3_paths = response_dict['data']['s3_path']
-
+print(s3_paths)
 # Превращаем в список значений (самих URL)
 links_list = list(s3_paths.values())
 os.makedirs('./stage', exist_ok=True)
@@ -34,5 +34,5 @@ for link in links_list:
     print(link)
     print(link.split('/')[-1])
     df_order_log = pd.read_csv(link)
-    print(df_order_log.to_string(index=False))
+#    print(df_order_log.to_string(index=False))
     df_order_log.to_csv(f'./stage/{link.split("/")[-1]}', index=False)
