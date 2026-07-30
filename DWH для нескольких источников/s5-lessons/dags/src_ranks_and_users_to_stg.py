@@ -78,7 +78,7 @@ def extract_load_table(table_name: str):
             df.to_sql(
                 name=dwh_table_name,
                 schema='stg',
-                com=conn,
+                con=conn,
                 if_exists='append',
                 index=False,
                 chunksize=1000,
@@ -95,7 +95,7 @@ def extract_load_ranks():
 
 @task(task_id='extract_load_users_via_hook')
 def extract_load_users():
-    return extraсt_load_table('users')
+    return extract_load_table('users')
 
 @dag(
     schedule_interval='0/15 * * * *',
@@ -105,9 +105,8 @@ def extract_load_users():
     is_paused_upon_creation=False
 )
 def load_data_to_stg():
-    rank_task = extract_load_ranks()
-    users_task = extract_load_users()
+    extract_load_ranks()
+    extract_load_users()
 
-    [ranks_task, users_task]
 
-dag = load_data_to_stg
+dag = load_data_to_stg()
