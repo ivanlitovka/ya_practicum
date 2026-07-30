@@ -1,5 +1,5 @@
 from airflow.decorators import dag, task
-from airflow.hook.base import BaseHook
+from airflow.hooks.base import BaseHook
 from sqlalchemy import create_engine, text
 import json
 import pandas as pd
@@ -56,7 +56,7 @@ def extract_load_table(table_name: str):
     try:
         df = pd.read_sql(f'SELECT * FROM {table_name}', con=src_engine)
     except Exception as e:
-        log.error(f'Ошибка при чтении источника: {e}', exc_info=True')
+        log.error(f'Ошибка при чтении источника: {e}', exc_info=True)
         raise
 
     if df.empty:
@@ -85,7 +85,7 @@ def extract_load_table(table_name: str):
                 method='multi'
             )
             log.info(f'Данные успешно загружены в stg.{dwh_table_name}')
-        except: Exception as e:
+        except Exception as e:
             log.error(f'Ошибка при вставке данных в DWH: {e}', exc_info=True)
             raise
 
