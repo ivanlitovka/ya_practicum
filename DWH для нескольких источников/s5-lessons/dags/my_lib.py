@@ -768,3 +768,114 @@ def load_dm_settlement_report(
     except Exception as e:
         log.error(f'Ошибка при загрузке dm_settlement_report: {e}', exc_info=True)
         raise
+
+def load_dm_couriers(
+    dwh_conn_id: str,
+    schema: str = 'dds'
+) -> None:
+    """
+    Загружает измерение dm_couriers из stg.couriers
+    """
+    log.info('Начинаем загрузку dm_couriers из stg.couriers')
+    
+    try:
+        engine = create_postgres_engine(dwh_conn_id)
+        
+        with engine.begin() as conn:
+            # Очищаем таблицу
+            conn.execute(text('TRUNCATE TABLE dds.dm_couriers RESTART IDENTITY CASCADE'))
+            
+            # Вставляем курьеров
+            query = text("""
+                INSERT INTO dds.dm_couriers (courier_id, courier_name)
+                SELECT courier_id, courier_name
+                FROM stg.couriers
+                ON CONFLICT (courier_id) DO UPDATE SET
+                    courier_name = EXCLUDED.courier_name
+            """)
+            
+            result = conn.execute(query)
+            log.info(f'Загружено {result.rowcount} курьеров в dm_couriers')
+            
+    except Exception as e:
+        log.error(f'Ошибка при загрузке dm_couriers: {e}', exc_info=True)
+        raise
+
+
+def load_fct_deliveries(
+    dwh_conn_id: str,
+    schema: str = 'dds'
+) -> None:
+    """
+    Загружает факт доставок fct_deliveries из stg.deliveries
+    """
+    log.info('Начинаем загрузку fct_deliveries из stg.deliveries')
+    
+    try:
+        engine = create_postgres_engine(dwh_conn_id)
+        
+        with engine.begin() as conn:
+            # Очищаем таблицу
+            conn.execute(text('TRUNCATE TABLE dds.fct_deliveries RESTART IDENTITY CASCADE'))
+            
+            # Вставляем доставки
+            query = text("""
+                INSERT INTO dds.fct_deliveries (
+                    order_id,
+                    courier_id,
+                    delivery_ts,
+                    rate,
+                    tip_sum
+                )
+                SELECT 
+                    dm_orders.id as order_id,
+                    dm_couriers.id as courier_id,
+                    stg.delivery_ts,
+                    stg.rate,
+                    stg.tip_sum
+                FROM stg.deliveries stg
+                JOIN dds.dm_orders 
+                    ON dm_orders.order_key = stg.order_id
+                JOIN dds.dm_couriers 
+                    ON dm_couriers.courier_id = stg.courier_id
+                ON CONFLICT (order_id, courier_id) DO UPDATE SET
+                    delivery_ts = EXCLUDED.delivery_ts,
+                    rate = EXCLUDED.rate,
+                    tip_sum = EXCLUDED.tip_sum
+            """)
+            
+            result = conn.execute(query)
+            log.info(f'Загружено {result.rowcount} доставок в fct_deliveries')
+            
+    except Exception as e:
+        log.error(f'Ошибка при загрузке fct_deliveries: {e}', exc_info=True)
+        raise
+
+
+def update_dm_orders_courier(
+    dwh_conn_id: str,
+    schema: str = 'dds'
+) -> None:
+    """
+    Обновляет dm_orders — проставляет courier_id из доставок
+    """
+    log.info('Обновляем dm_orders — проставляем courier_id')
+    
+    try:
+        engine = create_postgres_engine(dwh_conn_id)
+        
+        with engine.begin() as conn:
+            query = text("""
+                UPDATE dds.dm_orders
+                SET courier_id = fct.courier_id
+                FROM dds.fct_deliveries fct
+                WHERE dm_orders.id = fct.order_id
+                AND dm_orders.courier_id IS NULL
+            """)
+            
+            result = conn.execute(query)
+            log.info(f'Обновлено {result.rowcount} заказов с courier_id')
+            
+    except Exception as e:
+        log.error(f'Ошибка при обновлении dm_orders: {e}', exc_info=True)
+        raise
